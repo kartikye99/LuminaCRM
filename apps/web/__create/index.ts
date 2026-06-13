@@ -44,8 +44,14 @@ const adapter = NeonAdapter(pool);
 
 const app = new Hono();
 
-// Run database tables and seed initialization
-initializeTables().catch((err) => console.error('Failed to initialize database tables:', err));
+let dbInitialized = false;
+app.use('*', async (c, next) => {
+  if (!dbInitialized) {
+    dbInitialized = true;
+    initializeTables().catch((err) => console.error('Failed to initialize database tables:', err));
+  }
+  return next();
+});
 
 app.use('*', requestId());
 
