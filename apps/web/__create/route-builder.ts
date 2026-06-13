@@ -9,7 +9,7 @@ const API_BASENAME = '/api';
 const api = new Hono();
 
 // Get current directory
-const __dirname = join(fileURLToPath(new URL('.', import.meta.url)), '../src/app/api');
+const __dirname = join(process.cwd(), 'src/app/api');
 if (globalThis.fetch) {
   globalThis.fetch = updatedFetch;
 }
@@ -25,7 +25,9 @@ async function findRouteFiles(dir: string): Promise<string[]> {
       const statResult = await stat(filePath);
 
       if (statResult.isDirectory()) {
-        routes = routes.concat(await findRouteFiles(filePath));
+        if (file !== '__create') {
+          routes = routes.concat(await findRouteFiles(filePath));
+        }
       } else if (file === 'route.js') {
         // Handle root route.js specially
         if (filePath === join(__dirname, 'route.js')) {
