@@ -113,6 +113,7 @@ export default function Dashboard() {
 
   // Search Filter
   const [customerSearch, setCustomerSearch] = useState("");
+  const [dbError, setDbError] = useState(null);
 
   // Initial Fetch & Polling for live callbacks
   useEffect(() => {
@@ -139,9 +140,14 @@ export default function Dashboard() {
         setStatsData(data.stats);
         setChannelPerf(data.channelPerformance);
         setLogs(data.logs);
+        setDbError(null);
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        setDbError(errData.error || "Failed to fetch analytics");
       }
     } catch (err) {
       console.error("Error fetching analytics:", err);
+      setDbError(err.message || "Failed to fetch analytics");
     }
   };
 
@@ -448,6 +454,18 @@ export default function Dashboard() {
       </nav>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        {dbError && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6 text-red-700 flex items-start gap-3 text-sm">
+            <span className="bg-red-100 text-red-800 w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">!</span>
+            <div className="flex-1 text-left">
+              <h4 className="font-semibold text-red-900">Database Connection Error</h4>
+              <p className="text-red-700 mt-0.5">{dbError}</p>
+              <p className="text-xs text-red-500 mt-2 font-normal">
+                Please check the database status, verify that your <code>DATABASE_URL</code> environment variable on Render matches your database's connection string, and ensure your Neon database password has not changed or expired.
+              </p>
+            </div>
+          </div>
+        )}
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-semibold text-[#111827] tracking-tight mb-2">
