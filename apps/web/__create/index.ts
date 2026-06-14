@@ -37,10 +37,18 @@ for (const method of ['log', 'info', 'warn', 'error', 'debug'] as const) {
   };
 }
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
-const adapter = NeonAdapter(pool);
+let activePool: any = null;
+const lazyPool = {
+  query: (...args: any[]) => {
+    if (!activePool) activePool = new Pool({ connectionString: process.env.DATABASE_URL });
+    return activePool.query(...args);
+  },
+  connect: (...args: any[]) => {
+    if (!activePool) activePool = new Pool({ connectionString: process.env.DATABASE_URL });
+    return activePool.connect(...args);
+  }
+} as any;
+const adapter = NeonAdapter(lazyPool);
 
 const app = new Hono();
 
