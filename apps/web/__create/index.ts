@@ -312,7 +312,13 @@ app.use('/api/auth/*', async (c, next) => {
 });
 app.route(API_BASENAME, api);
 
-export default await createHonoServer({
+console.log('[debug] index.ts: calling createHonoServer...');
+createHonoServer({
   app,
   defaultLogger: false,
+}).then(() => {
+  console.log('[debug] index.ts: createHonoServer completed.');
+}).catch((err) => {
+  console.error('[debug] index.ts: createHonoServer failed:', err);
 });
+export default app;

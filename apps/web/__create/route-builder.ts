@@ -67,9 +67,10 @@ function getHonoPath(routeFile: string): { name: string; pattern: string }[] {
 
 // Import and register all routes
 async function registerRoutes() {
+  console.log('[debug] registerRoutes: starting...');
   const routeFiles = (
     await findRouteFiles(__dirname).catch((error) => {
-      console.error('Error finding route files:', error);
+      console.error('[debug] Error finding route files:', error);
       return [];
     })
   )
@@ -78,13 +79,17 @@ async function registerRoutes() {
       return b.length - a.length;
     });
 
+  console.log('[debug] registerRoutes: found files:', routeFiles);
+
   // Clear existing routes
   api.routes = [];
 
   for (const routeFile of routeFiles) {
     try {
+      console.log(`[debug] registerRoutes: importing ${routeFile}...`);
       const routeUrl = pathToFileURL(routeFile).href;
       const route = await import(/* @vite-ignore */ `${routeUrl}?update=${Date.now()}`);
+      console.log(`[debug] registerRoutes: imported ${routeFile} successfully.`);
 
       const methods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
       for (const method of methods) {
@@ -135,7 +140,9 @@ async function registerRoutes() {
 }
 
 // Initial route registration
+console.log('[debug] route-builder: calling registerRoutes...');
 await registerRoutes();
+console.log('[debug] route-builder: registerRoutes completed.');
 
 // Hot reload routes in development
 if (import.meta.env.DEV) {
